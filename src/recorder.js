@@ -176,11 +176,14 @@ export class Recorder extends EventTarget {
   }
 
   isSupports() {
-    if (navigator.mediaDevices?.getDisplayMedia === undefined) {
+    if (navigator.mediaDevices === undefined) {
+      return false;
+    }
+    if (navigator.mediaDevices.getDisplayMedia === undefined) {
       return false;
     }
 
-    return navigator.mediaDevices?.getUserMedia !== undefined;
+    return navigator.mediaDevices.getUserMedia !== undefined;
   }
 
   showAlert(msg, hide) {
