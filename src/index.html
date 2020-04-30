@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Screen Recorder</title>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500&display=swap"
+          rel="stylesheet">
+</head>
+
+<body class="mat-typography">
+    <div class="alert-message"
+         id="alert-message"></div>
+    <div class="main-container">
+        <div class="video-container">
+            <video id="video-out"
+                   playsinline
+                   autoplay
+                   loop
+                   muted
+                   controls></video>
+        </div>
+        <div class="controls-container">
+            <div class="switch-group">
+                <label>
+                    <input type="checkbox"
+                           id="mic-switch"> enable mic audio
+                </label>
+                <label>
+                    <input type="checkbox"
+                           id="desktop-audio-switch"> enable desktop audio
+                </label>
+            </div>
+            <div class="btn-group">
+                <button class="btn"
+                        id="btn-start">start</button>
+                <button class="btn"
+                        id="btn-stop"
+                        disabled>stop</button>
+                <a class="btn btn-disabled"
+                   download="video.webm"
+                   id="btn-download">download</a>
+            </div>
+        </div>
+    </div>
+    <script src="./index.js"></script>
+</body>
+
+</html>
