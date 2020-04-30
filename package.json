@@ -7,6 +7,6 @@
   },
   "scripts": {
     "watch": "parcel src/index.html",
-    "build": "parcel build src/index.html"
+    "build": "parcel build --no-source-maps --no-content-hash src/index.html"
   }
 }
