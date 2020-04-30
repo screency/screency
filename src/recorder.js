@@ -6,7 +6,6 @@ const ErrorAlert = {
   Unknown: 'Unknown error',
 }
 
-
 export class Recorder extends EventTarget {
   constructor() {
     super();
@@ -48,11 +47,10 @@ export class Recorder extends EventTarget {
     this.active = true;
     this.stream = new MediaStream(tracks);
 
-    // videoElement.srcObject = stream;
-    // videoElement.muted = true;
-
     this.recorder = this.initMediaRecorder(this.stream);
     this.recorder.start(10);
+
+    this.dispatchEvent(new CustomEvent('start', { detail: this.stream }));
   }
 
   stop() {

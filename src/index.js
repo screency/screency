@@ -24,10 +24,6 @@ document.addEventListener("DOMContentLoaded", function (event) {
       enableDesktopAudio: desktopAudioSwitch.checked,
       enableMicAudio: micSwitch.checked
     });
-
-    toggleButton(startBtn, false);
-    toggleButton(stopBtn, true);
-    active = true;
   });
 
   stopBtn.addEventListener('click', () => {
@@ -39,6 +35,16 @@ document.addEventListener("DOMContentLoaded", function (event) {
       event.preventDefault();
     }
   });
+
+  rec.addEventListener('start', (event) => {
+    toggleButton(startBtn, false);
+    toggleButton(stopBtn, true);
+    active = true;
+
+    // videoElement.srcObject = stream;
+    // videoElement.muted = true;
+    // videoEl.srcObject = event.detail;
+  })
 
   rec.addEventListener('stop', event => {
     videoEl.src = event.detail;

@@ -246,11 +246,12 @@ class Recorder extends EventTarget {
 
     const tracks = [...this.desktopStream.getVideoTracks(), ...this.mergeAudioStreams(this.desktopStream, this.voiceStream)];
     this.active = true;
-    this.stream = new MediaStream(tracks); // videoElement.srcObject = stream;
-    // videoElement.muted = true;
-
+    this.stream = new MediaStream(tracks);
     this.recorder = this.initMediaRecorder(this.stream);
     this.recorder.start(10);
+    this.dispatchEvent(new CustomEvent('start', {
+      detail: this.stream
+    }));
   }
 
   stop() {
@@ -436,9 +437,6 @@ document.addEventListener("DOMContentLoaded", function (event) {
       enableDesktopAudio: desktopAudioSwitch.checked,
       enableMicAudio: micSwitch.checked
     });
-    toggleButton(startBtn, false);
-    toggleButton(stopBtn, true);
-    active = true;
   });
   stopBtn.addEventListener('click', () => {
     rec.stop();
@@ -447,6 +445,13 @@ document.addEventListener("DOMContentLoaded", function (event) {
     if (active || !ready) {
       event.preventDefault();
     }
+  });
+  rec.addEventListener('start', event => {
+    toggleButton(startBtn, false);
+    toggleButton(stopBtn, true);
+    active = true; // videoElement.srcObject = stream;
+    // videoElement.muted = true;
+    // videoEl.srcObject = event.detail;
   });
   rec.addEventListener('stop', event => {
     videoEl.src = event.detail;
