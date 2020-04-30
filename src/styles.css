@@ -82,3 +82,11 @@ html {
   text-align: center;
   display: none;
 }
+
+#webcam {
+  position: absolute;
+  height: 120px;
+  right: 40px;
+  bottom: 40px;
+  opacity: 0;
+}

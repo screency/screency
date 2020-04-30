@@ -15,14 +15,25 @@ document.addEventListener("DOMContentLoaded", function (event) {
   const downloadBtn = document.getElementById('btn-download');
   const micSwitch = document.getElementById('mic-switch');
   const desktopAudioSwitch = document.getElementById('desktop-audio-switch');
+  const webcamSwitch = document.getElementById('webcam-switch');
   const videoEl = document.getElementById('video-out');
+  const webcamVideoEl = document.getElementById('webcam');
+  let pictureInPictureEnabled = false;
   let active = false;
   let ready = false;
+
+  const requestPictureInPicture = () => {
+    webcamVideoEl.requestPictureInPicture().catch(err => {
+      console.error('picture in picture request failed:', err);
+      pictureInPictureEnabled = true;
+    })
+  }
 
   startBtn.addEventListener('click', () => {
     rec.start({
       enableDesktopAudio: desktopAudioSwitch.checked,
-      enableMicAudio: micSwitch.checked
+      enableMicAudio: micSwitch.checked,
+      enableWebcam: webcamSwitch.checked,
     });
   });
 
@@ -41,9 +52,15 @@ document.addEventListener("DOMContentLoaded", function (event) {
     toggleButton(stopBtn, true);
     active = true;
 
-    // videoElement.srcObject = stream;
-    // videoElement.muted = true;
-    // videoEl.srcObject = event.detail;
+    if (event.detail) {
+      // webcam enabled
+      webcamVideoEl.muted = true;
+      webcamVideoEl.srcObject = event.detail;
+    }
+
+    webcamVideoEl.addEventListener('loadedmetadata', () => {
+      webcamVideoEl.style.opacity = 1;
+    });
   })
 
   rec.addEventListener('stop', event => {
@@ -56,5 +73,32 @@ document.addEventListener("DOMContentLoaded", function (event) {
     toggleButton(stopBtn, false);
 
     downloadBtn.classList.remove('btn-disabled');
+    webcamVideoEl.style.opacity = 0;
+
+    if (pictureInPictureEnabled) {
+      document.exitPictureInPicture()
+        .then(() => {
+          pictureInPictureEnabled = false;
+        })
+        .catch(err => {
+          console.error('exit picture in picture failed:', err);
+        })
+    }
   });
+
+  webcamVideoEl.addEventListener('enterpictureinpicture', () => {
+    webcamVideoEl.style.opacity = 0;
+    pictureInPictureEnabled = true;
+  });
+
+  webcamVideoEl.addEventListener('leavepictureinpicture', () => {
+    pictureInPictureEnabled = false;
+    if (active) {
+      webcamVideoEl.style.opacity = 1;
+    }
+  });
+
+  webcamVideoEl.addEventListener('dblclick', () => {
+    requestPictureInPicture();
+  })
 });

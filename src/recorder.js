@@ -2,6 +2,8 @@ const ErrorAlert = {
   NotSupports: 'Sorry, your browser does not support screen capture',
   NotAllowedScreen: 'Please enable screen capture',
   NotAllowedMic: 'You did not allow access to the microphone',
+  NotAllowedWebcam: 'You did not allow access to the webcam',
+  WebcamNotFound: 'Webcam not found',
   RecordingError: 'There was an error while recording, recording was stopped',
   Unknown: 'Unknown error',
 }
@@ -11,7 +13,7 @@ export class Recorder extends EventTarget {
     super();
     this.alertEl = document.getElementById('alert-message');
   }
-  async start({ enableDesktopAudio = false, enableMicAudio = false }) {
+  async start({ enableDesktopAudio = false, enableMicAudio = false, enableWebcam = false }) {
     if (!this.checkSupportAndAlert()) {
       return;
     }
@@ -40,6 +42,10 @@ export class Recorder extends EventTarget {
       this.voiceStream = await this.getVoiceStream();
     }
 
+    if (enableWebcam) {
+      this.webcamStream = await this.getWebcamStream();
+    }
+
     const tracks = [
       ...this.desktopStream.getVideoTracks(),
       ...this.mergeAudioStreams(this.desktopStream, this.voiceStream),
@@ -50,7 +56,7 @@ export class Recorder extends EventTarget {
     this.recorder = this.initMediaRecorder(this.stream);
     this.recorder.start(10);
 
-    this.dispatchEvent(new CustomEvent('start', { detail: this.stream }));
+    this.dispatchEvent(new CustomEvent('start', { detail: this.webcamStream }));
   }
 
   stop() {
@@ -72,9 +78,11 @@ export class Recorder extends EventTarget {
     this.stopStream(this.stream);
     this.stopStream(this.voiceStream);
     this.stopStream(this.desktopStream);
+    this.stopStream(this.webcamStream);
     this.stream = null;
     this.voiceStream = null;
     this.desktopStream = null;
+    this.webcamStream = null;
 
     this.recording = window.URL.createObjectURL(new Blob(this.chunks, { type: 'video/webm; codecs=vp8' }));
 
@@ -100,6 +108,7 @@ export class Recorder extends EventTarget {
         this.showAlert(ErrorAlert.NotAllowedScreen, true);
       } else {
         this.showAlert(ErrorAlert.Unknown, true);
+        console.error('user display stream request failed: ', err)
       }
       return null;
     }
@@ -114,6 +123,24 @@ export class Recorder extends EventTarget {
         this.showAlert(ErrorAlert.NotAllowedMic, false);
       } else {
         this.showAlert(ErrorAlert.Unknown, true);
+        console.error('user voice stream request failed: ', err)
+      }
+      return null;
+    }
+  }
+
+  async getWebcamStream() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      return stream;
+    } catch (err) {
+      if (this.isNotAllowedError(err)) {
+        this.showAlert(ErrorAlert.NotAllowedWebcam, false);
+      } else if (err.name === 'NotFoundError') {
+        this.showAlert(ErrorAlert.WebcamNotFound, false);
+      } else {
+        this.showAlert(ErrorAlert.Unknown, true);
+        console.error('user webcam stream request failed: ', err)
       }
       return null;
     }
