@@ -26,7 +26,8 @@
             <div class="switch-group">
                 <label>
                     <input type="checkbox"
-                           id="mic-switch"> enable mic audio
+                           id="mic-switch"
+                           checked> enable mic audio
                 </label>
                 <label>
                     <input type="checkbox"
@@ -34,7 +35,12 @@
                 </label>
                 <label>
                     <input type="checkbox"
-                           id="webcam-switch"> enable webcam
+                           id="webcam-switch"
+                           checked> enable webcam
+                </label>
+                <label>
+                    <input type="checkbox"
+                           id="pinp-switch"> picture-in-picture webcam
                 </label>
             </div>
             <div class="btn-group">
@@ -53,6 +59,13 @@
            autoplay
            muted></video>
     <script src="index.js"></script>
+    <div id="video-merge-area">
+        <canvas id="merge-canvas"></canvas>
+        <video id="vm-webcam"
+               muted></video>
+        <video id="vm-display"
+               muted></video>
+    </div>
 </body>
 
 </html>

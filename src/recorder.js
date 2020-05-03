@@ -1,3 +1,5 @@
+import { VideoMerge } from './video-merge';
+
 const ErrorAlert = {
   NotSupports: 'Sorry, your browser does not support screen capture',
   NotAllowedScreen: 'Please enable screen capture',
@@ -12,8 +14,14 @@ export class Recorder extends EventTarget {
   constructor() {
     super();
     this.alertEl = document.getElementById('alert-message');
+    this.merger = new VideoMerge();
   }
-  async start({ enableDesktopAudio = false, enableMicAudio = false, enableWebcam = false }) {
+  async start({
+    enableDesktopAudio = false,
+    enableMicAudio = false,
+    enableWebcam = false,
+    picInPic = false,
+  }) {
     if (!this.checkSupportAndAlert()) {
       return;
     }
@@ -34,20 +42,33 @@ export class Recorder extends EventTarget {
     if (this.desktopStream === null) {
       return;
     }
+
     this.desktopStream.addEventListener('inactive', (e) => {
-      this.stop();
+      this.stopRecording();
     });
 
     if (enableMicAudio) {
       this.voiceStream = await this.getVoiceStream();
     }
 
+    let mainVideoStream = this.desktopStream;
+
     if (enableWebcam) {
       this.webcamStream = await this.getWebcamStream();
+      if (!this.webcamStream) {
+        this.stopRecording();
+        return;
+      }
+
+      if (!picInPic) {
+        this.merger.addDisplay(this.desktopStream);
+        this.merger.addWebcam(this.webcamStream);
+        mainVideoStream = this.merger.start();
+      }
     }
 
     const tracks = [
-      ...this.desktopStream.getVideoTracks(),
+      ...mainVideoStream.getVideoTracks(),
       ...this.mergeAudioStreams(this.desktopStream, this.voiceStream),
     ];
     this.active = true;
@@ -56,7 +77,9 @@ export class Recorder extends EventTarget {
     this.recorder = this.initMediaRecorder(this.stream);
     this.recorder.start(10);
 
-    this.dispatchEvent(new CustomEvent('start', { detail: this.webcamStream }));
+    this.dispatchEvent(new CustomEvent('start', { detail: picInPic ? this.webcamStream : null }));
+
+    this.merger.start();
   }
 
   stop() {
@@ -65,12 +88,9 @@ export class Recorder extends EventTarget {
   }
 
   stopRecording() {
-    if (this.recorder == null) {
-      return;
-    }
     this.active = false;
 
-    if (this.recorder.state !== 'inactive') {
+    if (this.recorder && this.recorder.state !== 'inactive') {
       this.recorder.stop();
     }
     this.recorder = null;
@@ -79,12 +99,16 @@ export class Recorder extends EventTarget {
     this.stopStream(this.voiceStream);
     this.stopStream(this.desktopStream);
     this.stopStream(this.webcamStream);
+    this.merger.stop();
+
     this.stream = null;
     this.voiceStream = null;
     this.desktopStream = null;
     this.webcamStream = null;
 
-    this.recording = window.URL.createObjectURL(new Blob(this.chunks, { type: 'video/webm; codecs=vp8' }));
+    if (this.chunks.length) {
+      this.recording = window.URL.createObjectURL(new Blob(this.chunks, { type: 'video/webm; codecs=vp8' }));
+    }
 
     this.dispatchEvent(new CustomEvent('stop', { detail: this.recording }));
   }

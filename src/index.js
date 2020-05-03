@@ -16,8 +16,11 @@ document.addEventListener("DOMContentLoaded", function (event) {
   const micSwitch = document.getElementById('mic-switch');
   const desktopAudioSwitch = document.getElementById('desktop-audio-switch');
   const webcamSwitch = document.getElementById('webcam-switch');
+  const picInPicWebcamSwitch = document.getElementById('pinp-switch');
   const videoEl = document.getElementById('video-out');
   const webcamVideoEl = document.getElementById('webcam');
+
+  let pictureInPictureActive = false;
   let pictureInPictureEnabled = false;
   let active = false;
   let ready = false;
@@ -25,15 +28,17 @@ document.addEventListener("DOMContentLoaded", function (event) {
   const requestPictureInPicture = () => {
     webcamVideoEl.requestPictureInPicture().catch(err => {
       console.error('picture in picture request failed:', err);
-      pictureInPictureEnabled = true;
+      pictureInPictureActive = true;
     })
   }
 
   startBtn.addEventListener('click', () => {
+    pictureInPictureEnabled = !!picInPicWebcamSwitch.checked;
     rec.start({
       enableDesktopAudio: desktopAudioSwitch.checked,
       enableMicAudio: micSwitch.checked,
       enableWebcam: webcamSwitch.checked,
+      picInPic: picInPicWebcamSwitch.checked,
     });
   });
 
@@ -52,22 +57,30 @@ document.addEventListener("DOMContentLoaded", function (event) {
     toggleButton(stopBtn, true);
     active = true;
 
-    if (event.detail) {
-      // webcam enabled
-      webcamVideoEl.muted = true;
-      webcamVideoEl.srcObject = event.detail;
-    }
+    if (pictureInPictureEnabled) {
+      // if pic-in-pic mode enabled, starts streaming to video element
+      if (event.detail) {
+        // webcam enabled
+        webcamVideoEl.muted = true;
+        webcamVideoEl.srcObject = event.detail;
+      }
 
-    webcamVideoEl.addEventListener('loadedmetadata', () => {
-      webcamVideoEl.style.opacity = 1;
-    });
+      webcamVideoEl.addEventListener('loadedmetadata', () => {
+        webcamVideoEl.style.opacity = 1;
+      });
+    }
   })
 
   rec.addEventListener('stop', event => {
-    videoEl.src = event.detail;
-    downloadBtn.href = event.detail;
-    ready = true;
-    active = false;
+    if (event.detail) {
+      videoEl.src = event.detail;
+      downloadBtn.href = event.detail;
+      ready = true;
+      active = false;
+    } else {
+      ready = false;
+      active = false;
+    }
 
     toggleButton(startBtn, true);
     toggleButton(stopBtn, false);
@@ -75,10 +88,10 @@ document.addEventListener("DOMContentLoaded", function (event) {
     downloadBtn.classList.remove('btn-disabled');
     webcamVideoEl.style.opacity = 0;
 
-    if (pictureInPictureEnabled) {
+    if (pictureInPictureActive) {
       document.exitPictureInPicture()
         .then(() => {
-          pictureInPictureEnabled = false;
+          pictureInPictureActive = false;
         })
         .catch(err => {
           console.error('exit picture in picture failed:', err);
@@ -88,11 +101,11 @@ document.addEventListener("DOMContentLoaded", function (event) {
 
   webcamVideoEl.addEventListener('enterpictureinpicture', () => {
     webcamVideoEl.style.opacity = 0;
-    pictureInPictureEnabled = true;
+    pictureInPictureActive = true;
   });
 
   webcamVideoEl.addEventListener('leavepictureinpicture', () => {
-    pictureInPictureEnabled = false;
+    pictureInPictureActive = false;
     if (active) {
       webcamVideoEl.style.opacity = 1;
     }
