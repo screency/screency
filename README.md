@@ -1,5 +1,9 @@
 # Запись видео с экрана
 
+## Запуск демки
+
+Тут для сборки используется parceljs, весь код обычный javascript. Для запуска используйте `npm run watch`. Осноная логика работы собрана в классах [Recorder](https://github.com/screency/screency/blob/master/src/recorder.js) и [VideoMerge](https://github.com/screency/screency/blob/master/src/video-merge.js). Классы отвязаны от вывода, так что возможно их использовать отдельно от этой демки, только класс VideoMerge требует наличие определнных элементов собранных в div#video-merge-area
+
 ## Как это работает
 
 Все построено вокруг `MediaStream` - это комбинированный поток видео с экрана, камеры и аудио с микрофона или с компьютера. `Recorder.start()` запрашивает доступ к устройствам и объеденяет выбранные потоки в один MediaStream и передает в [MediaRecorder](https://developer.mozilla.org/ru/docs/Web/API/MediaRecorder) `Recorder.initMediaRecorder()`. При вызове Recorder.start() можно указать интересующие нас устройства:
