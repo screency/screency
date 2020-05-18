@@ -2,7 +2,7 @@
 
 ## Запуск демки
 
-Тут для сборки используется parceljs, весь код обычный javascript. Для запуска используйте `npm run watch`. Осноная логика работы собрана в классах [Recorder](https://github.com/screency/screency/blob/master/src/recorder.js) и [VideoMerge](https://github.com/screency/screency/blob/master/src/video-merge.js). Классы отвязаны от вывода, так что возможно их использовать отдельно от этой демки, только класс VideoMerge требует наличие определнных элементов собранных в div#video-merge-area
+Тут для сборки используется parceljs, весь код обычный javascript. Для запуска используйте `npm run watch`. Основная логика работы собрана в классах [Recorder](https://github.com/screency/screency/blob/master/src/recorder.js) и [VideoMerge](https://github.com/screency/screency/blob/master/src/video-merge.js). Классы отвязаны от вывода, так что возможно их использовать отдельно от этой демки, только класс VideoMerge требует наличие определенных элементов собранных в div#video-merge-area
 
 ## Как это работает
 
