@@ -21,6 +21,7 @@ export class Recorder extends EventTarget {
     enableMicAudio = false,
     enableWebcam = false,
     picInPic = false,
+    enableWatermark = true,
   }) {
     if (!this.checkSupportAndAlert()) {
       return;
@@ -65,6 +66,17 @@ export class Recorder extends EventTarget {
         this.merger.addWebcam(this.webcamStream);
         mainVideoStream = this.merger.start();
       }
+    }
+
+    if (enableWatermark) {
+      this.merger.enableWatermark();
+
+      if (!this.merger.isStarted()) {
+        this.merger.addDisplay(this.desktopStream);
+        mainVideoStream = this.merger.start();
+      }
+    } else {
+      this.merger.disableWatermark();
     }
 
     const tracks = [

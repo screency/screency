@@ -4,9 +4,15 @@ export class VideoMerge {
     this.context = this.canvas.getContext('2d');
     this.webcamVideo = document.getElementById('vm-webcam');
     this.displayVideo = document.getElementById('vm-display');
+    this.watermark = document.getElementById('vm-watermark');
     this.webcamRatio = 0.2; // relative to width
     this.webcamMargin = 10;
     this.isStopped = true;
+
+    this.watermarkEnabled = true;
+    this.watermarkRatio = 0.2;
+    this.watermarkMarginRight = 50;
+    this.watermarkMarginBottom = 30;
 
     this.setFPS(60);
     this.setCanvasSize(800, 600);
@@ -37,6 +43,18 @@ export class VideoMerge {
         track.stop();
       });
     }
+  }
+
+  isStarted() {
+    return !this.isStopped;
+  }
+
+  enableWatermark() {
+    this.watermarkEnabled = true;
+  }
+
+  disableWatermark() {
+    this.watermarkEnabled = false;
   }
 
   /**
@@ -72,6 +90,9 @@ export class VideoMerge {
 
     this.context.drawImage(this.displayVideo, 0, 0, this.canvasWidth, this.canvasHeight);
     this.drawInCircle();
+    if (this.watermarkEnabled) {
+      this.drawWatermark();
+    }
 
     setTimeout(this.draw.bind(this), 1000 / this.fps);
   }
@@ -105,6 +126,16 @@ export class VideoMerge {
     this.context.restore();
   }
 
+  drawWatermark() {
+    this.context.drawImage(
+      this.watermark,
+      this.watermarkXOffset,
+      this.watermarkYOffset,
+      this.watermarkWidth,
+      this.watermarkHeight
+    );
+  }
+
   getStreamSettings(stream) {
     const tracks = stream.getVideoTracks();
     if (tracks.length === 0) {
@@ -129,6 +160,8 @@ export class VideoMerge {
     this.canvas.width = this.canvasWidth;
 
     this.webcamWidth = this.canvasWidth * this.webcamRatio;
+
+    this.calcWatermarkSize();
   }
 
   setFPS(val) {
@@ -143,5 +176,12 @@ export class VideoMerge {
     videoEl.pause();
     videoEl.currentTime = 0;
     videoEl.srcObject = null;
+  }
+
+  calcWatermarkSize() {
+    this.watermarkWidth = this.canvasWidth * this.watermarkRatio;
+    this.watermarkHeight = (this.watermarkWidth / this.watermark.width) * this.watermark.height;
+    this.watermarkXOffset = this.canvasWidth - this.watermarkWidth - this.watermarkMarginRight;
+    this.watermarkYOffset = this.canvasHeight - this.watermarkHeight - this.watermarkMarginBottom;
   }
 }

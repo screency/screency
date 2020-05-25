@@ -17,6 +17,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
   const desktopAudioSwitch = document.getElementById('desktop-audio-switch');
   const webcamSwitch = document.getElementById('webcam-switch');
   const picInPicWebcamSwitch = document.getElementById('pinp-switch');
+  const watermarkSwitch = document.getElementById('watermark-switch');
   const videoEl = document.getElementById('video-out');
   const webcamVideoEl = document.getElementById('webcam');
 
@@ -39,6 +40,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
       enableMicAudio: micSwitch.checked,
       enableWebcam: webcamSwitch.checked,
       picInPic: picInPicWebcamSwitch.checked,
+      enableWatermark: watermarkSwitch.checked,
     });
   });
 

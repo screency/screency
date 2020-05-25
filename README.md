@@ -17,13 +17,15 @@
   // запросит доступ к камере, так же в случае запрета пользователем или отсутствия устройства будет выкинуто исключеие
   enableWebcam?: boolean = false,
   // включает режим 'картинка-в-картинке' для отображения потока с камеры, в противном случае поток с камеры будет отображет в кружочке слева снизу в углу
-  picInPic?: boolean = false,
+  picInPic?: boolean = false;
+  // добавляет лого в правый нижний угол
+  enableWatermark?: boolean = false,
 }
 ```
 
-При остановке потока, например, если пользователь кликнул на 'STOP', необходимо остановить все запрошенные потоки и сохранить результат. Это происходит в методе `Recorder.stopRecording()`. Остановить необходимо все потоки, не только созданные из разных треков, но и сами источники, т.к. остановка стрима не останавливает источники. 
+При остановке потока, например, если пользователь кликнул на 'STOP', необходимо остановить все запрошенные потоки и сохранить результат. Это происходит в методе `Recorder.stopRecording()`. Остановить необходимо все потоки, не только созданные из разных треков, но и сами источники, т.к. остановка стрима не останавливает источники.
 
-### События Recorder 
+### События Recorder
 
 Класс Recorder наследует [EventTarget](https://developer.mozilla.org/ru/docs/Web/API/EventTarget) и позволяет подписаться на следующие события:
 
@@ -38,9 +40,9 @@
 
 Современные браузеры имеют возможность захвата потока видео или аудио с доступных устройств посредством [MediaDevices.getDisplayMedia()](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getDisplayMedia) и [MediaDevices.getUserMedia()](https://developer.mozilla.org/ru/docs/Web/API/MediaDevices/getUserMedia). Вызов методов запрашивает у пользователя разрешения доступа к устройствам. При вызове возвращается `Promise` с [MediaStream](https://developer.mozilla.org/ru/docs/Web/API/MediaStream), который содержит разные треки [MediaStreamTrack](https://developer.mozilla.org/ru/docs/Web/API/MediaStreamTrack). Это могут быть аудио или видео треки. Доступ у ним можно получить вызвав метод [MediaStream.getTracks()](https://developer.mozilla.org/ru/docs/Web/API/MediaStream/getTracks).
 
-## Наложение видео с камеры 
+## Наложение видео с камеры
 
-Если запрошена камера и отключен режим 'картинка-в-картинке', то видеопотоки накладываются с помощью canvas. Класс VideoMerge накладывает потоки через вызов метода `VideoMerge.addWebcam(stream)` и `VideoMerge.addDisplay(stream)`. Сначала передаем стрим в экрана и затем с камеры, первый стрим задаст размер для canvas и FPS отрисовки. 
+Если запрошена камера и отключен режим 'картинка-в-картинке', то видеопотоки накладываются с помощью canvas. Класс VideoMerge накладывает потоки через вызов метода `VideoMerge.addWebcam(stream)` и `VideoMerge.addDisplay(stream)`. Сначала передаем стрим в экрана и затем с камеры, первый стрим задаст размер для canvas и FPS отрисовки.
 
 Можно задать размер и положение вывода камеры:
 
@@ -54,3 +56,13 @@ this.webcamVideo.srcObject = stream;
 ```
 
 `start()` возвращает MediaStream, который дальше используется для создания общего потока, стрим получить можно с canvas'a вызвав [canvas.captureStream](https://developer.mozilla.org/ru/docs/Web/API/HTMLCanvasElement/captureStream)
+
+## Наложение водяного знака
+
+Так же используется `VideoMerge`. Методы `VideoMerge.enableWatermark()` и `VideoMerge.disableWatermark()` соответственно включают и отключают отрисовку логотипа. Знак рисуется также через `CanvasRenderingContext2D.drawImage()`.
+
+Опции отрисовки лого:
+
+- `watermarkRatio` - ширина лого относительно ширины основного видео
+- `watermarkMarginRight` - отступ справа
+- `watermarkMarginBottom` - отступ снизу
